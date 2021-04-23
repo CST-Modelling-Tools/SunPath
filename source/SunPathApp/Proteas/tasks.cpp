@@ -33,14 +33,16 @@ void taskClearSky()
     SunSpatial sunSpatial(sunCalculator);
 
     SkySampler skySampler(&sunSpatial);
-    skySampler.sample(30.*degree, 90.*degree);
+    skySampler.sample(20.*degree, 40.*degree);
 
     sunSpatial.setValues(sunFunctor);
     sunSpatial.setWeights(sunTemporal);
 
     // output
     FormatWSN formatWSN(&sunSpatial);
-    formatWSN.write(sDirTemp + "ClearSky.csv");
+    ParamsWSN params;
+//    params.positiveAzimuth = true;
+    formatWSN.write(s_dirTemp + "ClearSky.csv", params);
 }
 
 void taskTMY()
@@ -52,7 +54,7 @@ void taskTMY()
     SunTemporal sunTemporal(sunCalculator);
 
     FormatTMY formatTMY(&sunTemporal);
-    bool ok = formatTMY.read(sDirData + "file.tmy");
+    bool ok = formatTMY.read(s_dirData + "file.tmy");
     if (!ok) return;
 
     // spatial
@@ -65,5 +67,5 @@ void taskTMY()
 
     // output
     FormatWSN formatWSN(&sunSpatial);
-    formatWSN.write(sDirTemp + "ClearSky.csv");
+    formatWSN.write(s_dirTemp + "ClearSky.csv");
 }

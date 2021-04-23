@@ -7,9 +7,9 @@
 
 using Qt::endl;
 
-#include "SunPathLib/samplers/TimeSampler.h"
-
 namespace sp {
+
+
 
 FormatTMY::FormatTMY(SunTemporal* sunTemporal):
     m_sunTemporal(sunTemporal)
@@ -97,7 +97,8 @@ void FormatTMY::readInfo(QTextStream& fin, const ParamsTMY& /*params*/)
 {
     // line 1
     QString line = fin.readLine();
-    if (line.isNull()) throw QString("line 1 is missing");
+    if (line.isNull())
+        throw QString("line 1 is missing");
     QStringList list = line.split(',');
 
     int iLatitude = -1;
@@ -114,7 +115,8 @@ void FormatTMY::readInfo(QTextStream& fin, const ParamsTMY& /*params*/)
 
     // line 2
     line = fin.readLine();
-    if (line.isNull()) throw QString("line 2 is missing");
+    if (line.isNull())
+        throw QString("line 2 is missing");
     list = line.split(',');
     bool ok;
 

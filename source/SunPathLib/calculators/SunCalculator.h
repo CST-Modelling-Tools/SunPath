@@ -14,6 +14,8 @@ struct SUNPATHLIB Horizontal: public vec2d
 
     double azimuth() const {return x;} // from North to East
     double elevation() const {return y;}
+
+    void makeAzimuthPositive() {if (x < 0.) x += 2.*pi;}
 };
 
 

@@ -2,6 +2,6 @@
 
 QTextStream cout(stdout);
 
-QString sDirBuild("../../");
-QString sDirData(sDirBuild + "../SunPath/data/");
-QString sDirTemp(sDirBuild + "temp/");
+QString s_dirBuild("../../");
+QString s_dirData(s_dirBuild + "../SunPath/data/");
+QString s_dirTemp(s_dirBuild + "temp/");

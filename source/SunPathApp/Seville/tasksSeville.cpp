@@ -26,11 +26,11 @@ void taskSeville()
     SunTemporal sunTemporal(sunCalculator);
     FormatSeville formatSeville(&sunTemporal);
 //    ok = formatSeville.read(sDirData + "Seville/2016_Seville_1hor.csv");
-    ok = formatSeville.read(sDirData + "Seville/2016_Seville_1min.csv");
+    ok = formatSeville.read(s_dirData + "Seville/2016_Seville_1min.csv");
     if (!ok) return;
 
     if (!true) { // check import
-        formatSeville.write(sDirTemp + "Seville.csv");
+        formatSeville.write(s_dirTemp + "Seville.csv");
     }
 
     // spatial
@@ -71,6 +71,6 @@ void taskSeville()
 
     if (true) { // save weights
         FormatWSN formatWSN(&sunSpatial);
-        formatWSN.write(sDirTemp + "SevilleWeights.csv");
+        formatWSN.write(s_dirTemp + "SevilleWeights.csv");
     }
 }

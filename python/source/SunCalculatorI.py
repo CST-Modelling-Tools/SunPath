@@ -172,18 +172,23 @@ class SunCalculatorI(SunCalculator):
             p.kernel(q.v) 
             for q in self.nodes]
             for p in self.nodes])
-        values = [sn.v for sn in self.nodes]
-        amplitudes = np.linalg.solve(matrixK, vs)   
+        values = [sn.f for sn in self.nodes]
+        amplitudes = np.linalg.solve(matrixK, values)   
         for (a, sn) in zip(amplitudes, self.nodes):
             sn.a = a
         
     def read(self, filename):
         file = open(filename, "r")
         reader = csv.reader(file, delimiter=',')
-        
+
         while True:
             row = next(reader)
-            if len(row) < 1: continue
+            if row[0].find('<Header>') >= 0: break
+            
+        while True:
+            row = next(reader)
+            if len(row) == 0: continue
+            if row[0].find('</Header>') >= 0: break
             row0 = row[0]
             if row0.find('Latitude') >= 0: 
                 nA = row0.find(':') + 1
@@ -193,23 +198,26 @@ class SunCalculatorI(SunCalculator):
                 nA = row0.find(':') + 1
                 nB = row0.find('deg')
                 self.longitude = float(row0[nA:nB])*degree
-            elif row0.strip() == 'Index':
-                break
 
+        while True:
+            row = next(reader)
+            if row[0].find('<Data>') >= 0: break
+          
+        row = next(reader)  
         nodes = []
         while True:        
-            try: row = next(reader)
-            except StopIteration: break
+            row = next(reader)
+            if row[0].find('</Data>') >= 0: break
             azimuth = float(row[1])*degree
             elevation = float(row[2])*degree
             sigma = float(row[3])*degree
             v = self.findVfromH((azimuth, elevation))
             f = float(row[4])
-            a = float(row[5])
-            w = float(row[6])    
-            wn = float(row[7])  
-            sn = SunNode(v, sigma, f, a, w, wn)
+            w = float(row[5])    
+            wn = float(row[6])  
+            sn = SunNode(v, sigma, f, 0., w, wn)
             nodes.append(sn)
         file.close()
         self.nodes = nodes
+        self.updateAmplitudes()
         

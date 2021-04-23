@@ -13,7 +13,7 @@ int main(int argc, char** argv)
     QCommandLineParser parser;
     parser.process(app);
 
-    QDir::current().mkpath(sDirTemp); // make path
+    QDir::current().mkpath(s_dirTemp); // make path
 
     taskClearSky();
 //    taskSeville();

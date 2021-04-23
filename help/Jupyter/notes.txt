@@ -1,0 +1,4 @@
+to open ipynb-files with a double click
+check that Anaconda is installed for all users
+copy Jupyter.bat to "C:\ProgramData\Anaconda3"
+run register.bat

@@ -9,8 +9,7 @@ class InterpolationTest : public QObject
 
 private slots:
     void test_One();
-//    void test_PanelCos();
-//    void test_HeliostatCos();
+    void test_HeliostatField_old();
     void test_HeliostatField();
-//    void test_ClearSky();
+    void test_ClearSky();
 };

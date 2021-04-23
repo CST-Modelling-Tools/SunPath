@@ -29,13 +29,13 @@ struct SUNPATHLIB SunFunctorHeliostatCos: SunFunctor
     double operator()(const vec3d& s) const;
 };
 
-struct SUNPATHLIB SunFunctorHeliostatField: SunFunctor
+struct SUNPATHLIB SunFunctorHeliostatFieldOld: SunFunctor
 {
     vec3d t;
     double operator()(const vec3d& s) const;
 };
 
-struct SUNPATHLIB SunFunctorHeliostatField2: SunFunctor
+struct SUNPATHLIB SunFunctorHeliostatField: SunFunctor
 {
     vec3d t;
     double operator()(const vec3d& s) const;

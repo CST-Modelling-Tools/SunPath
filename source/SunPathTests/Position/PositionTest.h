@@ -21,5 +21,7 @@ private slots:
     void test_MB_MB2();
     void test_MB_NREL();
     void test_MB_RG();
+
+// to run a single test member in Qt Creator, type its name in run settings
 };
 

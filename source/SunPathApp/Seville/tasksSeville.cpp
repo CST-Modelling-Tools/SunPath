@@ -41,7 +41,7 @@ void taskSeville()
     sunSpatial.setWeights(sunTemporal);
 
     if (!true) { // integral
-        SunFunctorHeliostatField2 sunFunctor;
+        SunFunctorHeliostatField sunFunctor;
         sunFunctor.t = vec3d::directionAE(180*degree, 30*degree);
         sunSpatial.setValues(sunFunctor);
 

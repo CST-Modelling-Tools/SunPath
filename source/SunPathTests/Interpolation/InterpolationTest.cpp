@@ -9,62 +9,77 @@
 #include <QQueue>
 
 
-void testSunInterpolator(const SunFunctor& sunFunctor)
+void testSunInterpolator(const SunFunctor& sunFunctor, double rho, double sigma)
 {
     SunCalculatorMB sunCalculator;
     sunCalculator.setLocation(sLocationProteas);
-    sunCalculator.setVersion(SunCalculatorMB::V2020);
 
+    // sample
     SunSpatial sunSpatial(sunCalculator);
 
-    QVector<double> resolutions = {30., 15.};
-    for (double resolution : resolutions)
+    SkySampler skySampler(&sunSpatial);
+    skySampler.sample(rho, sigma);
+    cout << QString("Nodes: %1\n").arg(sunSpatial.skyNodes().size());
+
+    sunSpatial.setValues(sunFunctor);
+    cout << QString("RMS at nodes: %1\n").arg(sunSpatial.validate());
+
+    // check
+    QDateTime tA = sunCalculator.getLocalTime(QDate(2021, 1, 1), QTime(0, 00));
+    QDateTime tB = tA.addYears(1);
+    int dt = QTime(0, 10).msecsSinceStartOfDay();
+
+    ErrorAnalysis ea;
+    QQueue<QDateTime> ts;
+    for (QDateTime t = tA; t < tB; t = t.addMSecs(dt))
     {
-        // set
-        SkySampler skySampler(&sunSpatial);
-        skySampler.sample(resolution*degree, 90.*degree);
-        cout << QString("Resolution: %1 deg\n").arg(resolution);
-        cout << QString("Sampling points: %1\n").arg(sunSpatial.skyNodes().size());
+        vec3d v = sunCalculator.findVector(t);
+        if (v.z < 0.) continue;
+        double f = sunSpatial.interpolate(v);
+        double f0 = sunFunctor(v);
 
-        sunSpatial.setValues(sunFunctor);
-        cout << QString("RMS (nodes): %1\n").arg(sunSpatial.validate());
+        ea.push(f, f0);
+        if (fabs(f - f0) < ea.maxAbs()) continue;
+        ts.enqueue(t);
+        if (ts.size() > 5) ts.dequeue();
+    }
+    cout << QString("RMS at timestamps: %1 (%2%)\n")
+        .arg(ea.rms())
+        .arg(100*ea.rms()/ea.fMax(), 0, 'f', 3);
 
-        // check
-        QDateTime tA(QDate(2021, 1, 1), QTime(0, 00), Qt::OffsetFromUTC, sunCalculator.location().offsetUTC());
-        QDateTime tB = tA.addYears(1);
-        int dt = QTime(0, 10).msecsSinceStartOfDay();
+    // report
+    cout << QString("Worst points:\n");
+    std::reverse(ts.begin(), ts.end());
+    for (QDateTime& t : ts) {
+        vec3d v = sunCalculator.findVector(t);
+        double f = sunSpatial.interpolate(v);
+        double f0 = sunFunctor(v);
 
-        ErrorAnalysis ea;
-        QQueue<QDateTime> ts;
-        for (QDateTime t = tA; t < tB; t = t.addMSecs(dt))
-        {
-            vec3d v = sunCalculator.findVector(t);
-            if (v.z < 0.) continue;
-            double f = sunSpatial.interpolate(v);
-            double f0 = sunFunctor(v);
+        cout << formatSunPos(t, sunCalculator.findHorizontal(v)) << endl;
+        cout << QString("Interpolation: %1, Function: %2, Difference: %3\n")
+            .arg(f, 0, 'f', 3)
+            .arg(f0, 0, 'f', 3)
+            .arg(f - f0, 0, 'f', 6);
+    }
+    cout << endl;
+}
 
-            ea.push(f, f0);
-            if (fabs(f - f0) < ea.maxAbs()) continue;
-            ts.enqueue(t);
-            if (ts.size() > 5) ts.dequeue();
-        }
-        cout << QString("RMS (full): %1%\n").arg(100*ea.rms(), 0, 'f', 3);
-        cout << endl;
+void testSunInterpolatorLoop(const SunFunctor& sunFunctor)
+{
+    struct Params {
+        double rho;
+        double sigma;
+    };
 
-        // worst points
-        std::reverse(ts.begin(), ts.end());
-        for (QDateTime& t : ts) {
-            vec3d v = sunCalculator.findVector(t);
-            double f = sunSpatial.interpolate(v);
-            double f0 = sunFunctor(v);
+    QVector<Params> runs;
+    runs << Params{30., 90.};
+    runs << Params{15., 90.};
+    runs << Params{20., 40.};
 
-            cout << formatSunPos(t, sunCalculator.findHorizontal(v)) << endl;
-            cout << QString("Interpolation: %1, Function: %2, Difference: %3\n")
-                .arg(f, 0, 'f', 3)
-                .arg(f0, 0, 'f', 3)
-                .arg(f - f0, 0, 'f', 6);
-        }
-        cout << endl;
+    for (Params& p : runs) {
+        cout << QString("Resolution: %1 deg\n").arg(p.rho);
+        cout << QString("Sigma: %1 deg\n").arg(p.sigma);
+        testSunInterpolator(sunFunctor, p.rho*degree, p.sigma*degree);
     }
 }
 
@@ -72,38 +87,30 @@ void InterpolationTest::test_One()
 {
     cout << "--- Test sun interpolation for one ---\n";
     SunFunctorOne functor;
-    testSunInterpolator(functor);
+    testSunInterpolatorLoop(functor);
 }
 
-//void InterpolationTest::test_PanelCos()
-//{
-//    cout << "--- Test sun interpolation for panel ---\n";
-//    SunFunctorPanelCos functor;
-//    functor.n = vec3d::directionAE(180*degree, 60*degree);
-//    testSunInterpolator(functor);
-//}
-
-//void InterpolationTest::test_HeliostatCos()
-//{
-//    cout << "--- Test sun interpolation for heliostat ---\n";
-//    SunFunctorHeliostatCos functor;
-//    functor.t = vec3d::directionAE(180*degree, 30*degree);
-//    testSunInterpolator(functor);
-//}
+void InterpolationTest::test_HeliostatField_old()
+{
+    cout << "--- Test sun interpolation for heliostat field old ---\n";
+    SunFunctorHeliostatFieldOld functor;
+    functor.t = vec3d::directionAE(180*degree, 30*degree);
+    testSunInterpolatorLoop(functor);
+}
 
 void InterpolationTest::test_HeliostatField()
 {
     cout << "--- Test sun interpolation for heliostat field ---\n";
     SunFunctorHeliostatField functor;
-    functor.t = vec3d::directionAE(180*degree, 20*degree);
-    testSunInterpolator(functor);
+    functor.t = vec3d::directionAE(180*degree, 30*degree);
+    testSunInterpolatorLoop(functor);
 }
 
-//void InterpolationTest::test_ClearSky()
-//{
-//    cout << "--- Test sun interpolation for irradiance of clear sky  ---\n";
-//    SunFunctorDNI functor;
-//    testSunInterpolator(functor);
-//}
+void InterpolationTest::test_ClearSky()
+{
+    cout << "--- Test sun interpolation for irradiance of clear sky  ---\n";
+    SunFunctorDNI functor;
+    testSunInterpolatorLoop(functor);
+}
 
 QTEST_MAIN(InterpolationTest)

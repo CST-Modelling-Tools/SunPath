@@ -10,43 +10,67 @@
 #include "SunPathLib/math/sampling/ErrorAnalysis.h"
 
 
-void testSunIntegrator(const SunFunctor& sunFunctor, const SunFunctor& wFunctor)
+void testSunIntegrator(const SunFunctor& sunFunctor, const SunFunctor& wFunctor,
+    double rho, double sigma)
 {
     SunCalculatorMB sunCalculator;
     sunCalculator.setLocation(sLocationProteas);
-    sunCalculator.setVersion(SunCalculatorMB::V2020);
 
+    // time
     SunTemporal sunTemporal(sunCalculator);
+
+    TimeSampler timeSampler(&sunTemporal);
+    QDateTime tA = sunCalculator.getLocalTime(QDate(2021, 1, 1), QTime(0, 00));
+    QDateTime tB = tA.addYears(1);
+    timeSampler.sample(tA, tB, QTime(0, 1), !true);
+
+    sunTemporal.setData(wFunctor);
+
+    // space
     SunSpatial sunSpatial(sunCalculator);
 
-//    QVector<double> resolutions = {30., 15.};
-    QVector<double> resolutions = {20.};
-    for (double resolution : resolutions)
-    {
-        // time
-        TimeSampler timeSampler(&sunTemporal);
-        QDateTime tA(QDate(2021, 1, 1), QTime(0, 00), Qt::OffsetFromUTC, sunCalculator.location().offsetUTC());
-        QDateTime tB = tA.addYears(1);
-        timeSampler.sample(tA, tB, QTime(0, 1), !true);
-        sunTemporal.setData(wFunctor);
+    SkySampler skySampler(&sunSpatial);
+    skySampler.sample(rho, sigma);
+    cout << QString("Sampling points: %1\n").arg(sunSpatial.skyNodes().size());
 
-        // space
-        SkySampler skySampler(&sunSpatial);
-        skySampler.sample(resolution*degree, 40.*degree);
-        cout << QString("Resolution: %1 deg\n").arg(resolution);
-        cout << QString("Sampling points: %1\n").arg(sunSpatial.skyNodes().size());
-        sunSpatial.setValues(sunFunctor);
-        sunSpatial.setWeights(sunTemporal);
+    sunSpatial.setValues(sunFunctor);
+    sunSpatial.setWeights(sunTemporal);
 
+    // report
+    double integralSampled = sunSpatial.integrate();
+    double integralDirect = sunTemporal.integrateWeighted(sunFunctor);
+    double diff = 100*fabs((integralSampled - integralDirect)/integralDirect);
+    cout << QString("Integral sampled: %1\n").arg(integralSampled);
+    cout << QString("Integral direct: %1\n").arg(integralDirect);
+    cout << QString("Difference: %1%\n").arg(formatF6(diff));
+    cout << endl;
+}
 
-        double integralSampled = sunSpatial.integrate();
-        double integralDirect = sunTemporal.integrateWeighted(sunFunctor);
-        double diff = 100*fabs((integralSampled - integralDirect)/integralDirect);
-        cout << QString("Integral sampled: %1\n").arg(integralSampled);
-        cout << QString("Integral direct: %1\n").arg(integralDirect);
-        cout << QString("Difference: %1%\n").arg(formatF6(diff));
-        cout << endl;
+void testSunIntegratorLoop(const SunFunctor& sunFunctor, const SunFunctor& wFunctor)
+{
+    struct Params {
+        double rho;
+        double sigma;
+    };
+
+    QVector<Params> runs;
+    runs << Params{30., 90.};
+    runs << Params{15., 90.};
+    runs << Params{20., 40.};
+
+    for (Params& p : runs) {
+        cout << QString("Resolution: %1 deg\n").arg(p.rho);
+        cout << QString("Sigma: %1 deg\n").arg(p.sigma);
+        testSunIntegrator(sunFunctor, wFunctor, p.rho*degree, p.sigma*degree);
     }
+}
+
+void IntegrationTest::test_HeliostatField_old()
+{
+    cout << "--- Test sun integration for heliostat old ---\n";
+    SunFunctorHeliostatFieldOld functor;
+    functor.t = vec3d::directionAE(180*degree, 30*degree);
+    testSunIntegratorLoop(functor, SunFunctorDNI());
 }
 
 void IntegrationTest::test_HeliostatField()
@@ -54,18 +78,8 @@ void IntegrationTest::test_HeliostatField()
     cout << "--- Test sun integration for heliostat ---\n";
     SunFunctorHeliostatField functor;
     functor.t = vec3d::directionAE(180*degree, 30*degree);
-    testSunIntegrator(functor, SunFunctorDNI());
-}
-
-void IntegrationTest::test_HeliostatField2()
-{
-    cout << "--- Test sun integration for heliostat ---\n";
-    SunFunctorHeliostatField2 functor;
-    functor.t = vec3d::directionAE(180*degree, 30*degree);
-    testSunIntegrator(functor, SunFunctorDNI());
+    testSunIntegratorLoop(functor, SunFunctorDNI());
 }
 
 
 QTEST_MAIN(IntegrationTest)
-//#include "IntegrationTest.moc"
-

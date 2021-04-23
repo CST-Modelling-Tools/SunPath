@@ -2,6 +2,7 @@
 
 #include "SunPathLib/math/geometry/vec3d.h"
 #include <QString>
+#include <QDateTime>
 
 namespace sp {
 
@@ -22,9 +23,8 @@ public:
     void setName(QString name) {m_name = name;}
     QString name() const {return m_name;}
 
-    void setLocation(double latitude, double longitude) {
-        m_location = vec2d(longitude, latitude);
-    }
+    void setLocation(double latitude, double longitude)
+        {m_location = vec2d(longitude, latitude);}
     vec2d location() const {return m_location;}
 
     void setLatitude(double y) {m_location.y = y;}
@@ -35,6 +35,9 @@ public:
 
     void setOffsetUTC(int offsetUTC) {m_offsetUTC = offsetUTC;}
     int offsetUTC() const {return m_offsetUTC;}
+
+    QDateTime getLocalTime(const QDate& date, const QTime& time) const
+        {return QDateTime(date, time, Qt::OffsetFromUTC, m_offsetUTC);}
 
 protected:
     QString m_name;

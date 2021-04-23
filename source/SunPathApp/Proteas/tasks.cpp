@@ -23,7 +23,7 @@ void taskClearSky()
     SunTemporal sunTemporal(sunCalculator);
 
     TimeSampler timeSampler(&sunTemporal);
-    QDateTime tA(QDate(2021, 1, 1), QTime(0, 00), Qt::OffsetFromUTC, sunCalculator.location().offsetUTC());
+    QDateTime tA = sunCalculator.getLocalTime(QDate(2021, 1, 1), QTime(0, 00));
     QDateTime tB = tA.addYears(1);
     timeSampler.sample(tA, tB, QTime(0, 5));
 

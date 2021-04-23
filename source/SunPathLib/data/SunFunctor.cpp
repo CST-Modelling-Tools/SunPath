@@ -18,17 +18,20 @@ double SunFunctorHeliostatCos::operator()(const vec3d& s) const
     return ns;
 }
 
-double SunFunctorHeliostatField::operator()(const vec3d& s) const
+double SunFunctorHeliostatFieldOld::operator()(const vec3d& s) const
 {
     if (s.z <= 0.) return 0.;
+
     vec3d n = (s + t).normalized();
     double ns = dot(n, s);
     if (ns <= 0.) return 0.;
-    ns *= s.z; // shading
-    return ns;
+    double ans = ns;
+
+    ans *= s.z; // shading
+    return ans;
 }
 
-double SunFunctorHeliostatField2::operator()(const vec3d& s) const
+double SunFunctorHeliostatField::operator()(const vec3d& s) const
 {
     if (s.z <= 0.) return 0.;
 

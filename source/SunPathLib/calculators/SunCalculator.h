@@ -41,6 +41,8 @@ public:
     // location
     void setLocation(const Location& location);
     const Location& location() const {return m_location;}
+    QDateTime getLocalTime(const QDate& date, const QTime& time) const
+        {return m_location.getLocalTime(date, time);}
 
     // position
     vec3d findVector(const Horizontal& hc) const;

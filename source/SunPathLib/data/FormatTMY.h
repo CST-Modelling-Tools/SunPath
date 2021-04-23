@@ -4,18 +4,6 @@
 
 namespace sp {
 
-/*
-Typical Meteorological Year
-
-https://re.jrc.ec.europa.eu/pvg_tools/en/#TMY
-https://energyplus.net/weather
-https://nsrdb.nrel.gov/
-
-C:\SAM\2020.11.29\solar_resource\
-C:\Program Files\SolarPILOT\1.3.8\climate_files\
-
-https://meteonorm.com/
-*/
 
 struct ParamsTMY {
     ParamsTMY(bool seconds = false, int offset = 0, int precision = 0):

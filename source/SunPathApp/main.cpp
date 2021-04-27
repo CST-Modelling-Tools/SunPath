@@ -15,8 +15,10 @@ int main(int argc, char** argv)
 
     QDir::current().mkpath(s_dirTemp); // make path
 
-    taskClearSky();
+//    taskClearSky();
 //    taskSeville();
+//    taskSevilleto1M();
+    taskSevilleWeights();
 
 //    return app.exec();
 }

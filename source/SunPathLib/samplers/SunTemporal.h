@@ -40,7 +40,7 @@ protected:
     QVector<TimeStamp> m_timeStamps;
     double m_timeStepH;
     QVector<double> m_data;
-    QSharedPointer<InterpolatorLinear> m_interpolator;
+    QSharedPointer<InterpolatorCubicMono> m_interpolator;
 };
 
 

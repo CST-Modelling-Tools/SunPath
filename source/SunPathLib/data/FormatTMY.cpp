@@ -133,8 +133,8 @@ void FormatTMY::readInfo(QTextStream& fin, const ParamsTMY& /*params*/)
 
     int offsetFromUTC = 0;
     if (iTimeZone > 0) {
-        offsetFromUTC = list[iTimeZone].toInt(&ok)*3600;
-        if (!ok) throw QString("toInt ") + line;
+        offsetFromUTC = list[iTimeZone].toDouble(&ok)*3600;
+        if (!ok) throw QString("toDouble ") + line;
     }
     Location location("TMY", latitude*sp::degree, longitude*sp::degree, offsetFromUTC);
     m_sunTemporal->calculator()->setLocation(location);
@@ -228,7 +228,7 @@ void FormatTMY::readData(QTextStream& fin, const ParamsTMY& params)
             dt = dt.addSecs(params.offset);
 
     TimeSampler timeSampler(m_sunTemporal);
-    timeSampler.sample(ts);
+    timeSampler.sample(ts, params.adjustDay);
 
     m_sunTemporal->setData(ds);
 }

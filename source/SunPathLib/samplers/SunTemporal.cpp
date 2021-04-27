@@ -35,7 +35,7 @@ namespace sp {
 
 SunTemporal::SunTemporal(SunCalculator& calculator):
     m_calculator(calculator.copy()),
-    m_interpolator(new InterpolatorLinear)
+    m_interpolator(new InterpolatorCubicMono)
 {
 
 }
@@ -111,6 +111,15 @@ double SunTemporal::average(QDateTime tA, QDateTime tB) const
 
 double SunTemporal::integrateWeighted(const SunFunctor& sf) const
 {
+//    Summator sum;
+//    for (int n = 1; n < m_timeStamps.size(); ++n) {
+//        double w = m_data[n - 1];
+//        double f = sf(m_timeStamps[n - 1].s) + sf(m_timeStamps[n].s);
+//        sum += w*f/2.;
+//    }
+//    return sum.result()*m_timeStepH;
+
+    // derivatives
     QVector<double> fs;
     for (const TimeStamp& ts : m_timeStamps)
         fs << sf(ts.s);

@@ -18,7 +18,7 @@ void FormatSeville::setLocation(Location& location)
     m_sunTemporal->calculator()->setLocation(location);
 }
 
-bool FormatSeville::read(QString fileName)
+bool FormatSeville::read(QString fileName, const ParamsSeville& params)
 {
     try {
         QFile file(fileName);
@@ -26,7 +26,7 @@ bool FormatSeville::read(QString fileName)
             throw QString("File not opened: ") + fileName;
 
         QTextStream fin(&file);
-        readData(fin);
+        readData(fin, params);
 
         m_message.clear();
         return true;
@@ -38,7 +38,7 @@ bool FormatSeville::read(QString fileName)
     }
 }
 
-bool FormatSeville::write(QString fileName)
+bool FormatSeville::write(QString fileName, const ParamsSeville& params)
 {
     try {
         QFile file(fileName);
@@ -50,13 +50,16 @@ bool FormatSeville::write(QString fileName)
         SunCalculator* sc = m_sunTemporal->calculator();
         fout << QString("Source,Latitude,Longitude,Time Zone\n");
         fout << QString("TMY3,%1,%2,%3\n")
-                .arg(sc->location().latitude()/sp::degree, 0, 'f', 6)
-                .arg(sc->location().longitude()/sp::degree, 0, 'f', 6)
-                .arg(sc->location().offsetUTC()/3600., 0, 'f', 3);
+            .arg(sc->location().latitude()/sp::degree, 0, 'f', 6)
+            .arg(sc->location().longitude()/sp::degree, 0, 'f', 6)
+            .arg(sc->location().offsetUTC()/3600., 0, 'f', 3);
 
         QString temp("Year,Month,Day,Hour,Minute,");
-        temp += "Seconds,";
-        temp += "Azimuth[deg],Elevation[deg],DNI[W/m2]\n";
+        if (params.seconds)
+            temp += "Seconds,";
+        if (params.writeSunpos)
+            temp += "Azimuth[deg],Elevation[deg],";
+        temp += "DNI[W/m2]\n";
         fout << temp;
 
         const QVector<TimeStamp>& timeStamps = m_sunTemporal->timeStamps();
@@ -73,11 +76,14 @@ bool FormatSeville::write(QString fileName)
             QTime t = dt.time();
             temp += QString::number(t.hour()) + ",";
             temp += QString::number(t.minute()) + ",";
-            temp += QString::number(t.second()) + ",";
+            if (params.seconds)
+                temp += QString::number(t.second()) + ",";
 
-            Horizontal hc = sc->findHorizontal(timeStamps[n].s);
-            temp += QString::number(hc.azimuth()/degree, 'f', 3) + ",";
-            temp += QString::number(hc.elevation()/degree, 'f', 3) + ",";
+            if (params.writeSunpos) {
+                Horizontal hc = sc->findHorizontal(timeStamps[n].s);
+                temp += QString::number(hc.azimuth()/degree, 'f', 3) + ",";
+                temp += QString::number(hc.elevation()/degree, 'f', 3) + ",";
+            }
 
             temp += QString::number(data[n - 1],'f', 3) + "\n";
 
@@ -94,7 +100,7 @@ bool FormatSeville::write(QString fileName)
     }
 }
 
-void FormatSeville::readData(QTextStream& fin)
+void FormatSeville::readData(QTextStream& fin, const ParamsSeville& params)
 {
     // line 3
     QString line = fin.readLine();
@@ -155,12 +161,20 @@ void FormatSeville::readData(QTextStream& fin)
         DNI = list[iDNI].toDouble(&ok);
         if (!ok) throw QString("toDouble ") + line;
 
-        ts << QDateTime(QDate(year, 1, 1).addDays(day - 1), QTime(hour, minute, second), Qt::OffsetFromUTC, offsetUTC);
+        // fix seville
+//        if (QTime(hour, minute, second).msecsSinceStartOfDay() == 0) continue;
+
+        QDateTime dt(QDate(year, 1, 1).addDays(day - 1), QTime(hour, minute, second), Qt::OffsetFromUTC, offsetUTC);
+        if (params.offset != 0) dt = dt.addSecs(params.offset);
+
+        ts << dt;
         ds << DNI;
     }
 
     int tStep = ts[1].msecsTo(ts[2]);
     ts[0] = ts[1].addMSecs(-tStep);
+//    qDebug() << ts[1];
+//    qDebug() << ts[0];
 
     TimeSampler timeSampler(m_sunTemporal);
     timeSampler.sample(ts);

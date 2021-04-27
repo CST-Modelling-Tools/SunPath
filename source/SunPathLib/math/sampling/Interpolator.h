@@ -44,6 +44,10 @@ protected:
 };
 
 
+// linear derivative, monotonic quadratic
+// class SUNPATHLIB InterpolatorLinearD: public Interpolator
+
+
 // https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline
 class SUNPATHLIB InterpolatorCubic: public Interpolator
 {

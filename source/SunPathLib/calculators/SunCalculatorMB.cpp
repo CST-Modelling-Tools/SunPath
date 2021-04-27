@@ -7,7 +7,7 @@ using namespace sp;
 
 SunCalculatorMB::SunCalculatorMB()
 {
-    setVersion(Version::V2001);
+    setVersion(Version::V2020);
 }
 
 SunCalculatorMB* SunCalculatorMB::copy() const

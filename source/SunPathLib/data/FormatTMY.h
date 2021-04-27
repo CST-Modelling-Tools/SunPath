@@ -8,6 +8,7 @@ namespace sp {
 struct SUNPATHLIB ParamsTMY
 {
     bool seconds = false; // write seconds
+    bool adjustDay = false;
     int offset = 0; // in seconds
     int precision = 0; // precision for function
 };

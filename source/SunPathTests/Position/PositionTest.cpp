@@ -15,7 +15,8 @@ void test(SunCalculatorMB& scA, SunCalculator& scB)
     scA.setLocation(sLocationProteas);
     scB.setLocation(sLocationProteas);
 
-    QDateTime tA(QDate(2021, 1, 1), QTime(0, 00), Qt::OffsetFromUTC, 2*3600);
+    QDateTime tA = QDateTime(QDate(2021, 1, 1), QTime(0, 00), Qt::OffsetFromUTC, 2*3600);
+//    QDateTime tA = scA.getLocalTime(QDate(2021, 1, 1), QTime(0, 00));
     QDateTime tB = tA.addYears(1);
     int dt = QTime(0, 05).msecsSinceStartOfDay();
 

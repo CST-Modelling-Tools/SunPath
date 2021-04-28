@@ -2,3 +2,11 @@ to open ipynb-files with a double click
 check that Anaconda is installed for all users
 copy Jupyter.bat to "C:\ProgramData\Anaconda3"
 run register.bat
+
+to hide run-button
+open file
+C:\ProgramData\Anaconda3\Lib\site-packages\notebook\static\custom\custom.css
+add text
+.code_cell .run_this_cell {
+    display: none;
+}

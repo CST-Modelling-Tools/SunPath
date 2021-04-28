@@ -147,15 +147,15 @@ void taskSevilleWeights()
     // temporal
     SunTemporal sunTemporal(sunCalculator);
     FormatTMY formatTMY(&sunTemporal);
-//    bool ok = formatTMY.read(s_dirData + "Seville/tmy_01min.csv");
+    bool ok = formatTMY.read(s_dirData + "Seville/tmy_01min.csv");
 //    bool ok = formatTMY.read(s_dirData + "Seville/tmy_01min_from_10min.csv");
 //    bool ok = formatTMY.read(s_dirData + "Seville/tmy_01min_from_60min.csv");
-    bool ok = formatTMY.read(s_dirData + "Seville/tmy_01min_from_60min_adj.csv");
+//    bool ok = formatTMY.read(s_dirData + "Seville/tmy_01min_from_60min_adj.csv");
     if (!ok) return;
 
     SunSpatial sunSpatial(sunCalculator);
     SkySampler skySampler(&sunSpatial);
-    skySampler.sample(20*degree, 40.*degree);
+    skySampler.sample(12*degree, 40.*degree);
 
     sunSpatial.setWeights(sunTemporal);
     FormatWSN formatWSN(&sunSpatial);

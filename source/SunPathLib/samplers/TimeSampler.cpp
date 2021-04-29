@@ -93,9 +93,9 @@ void TimeSampler::adjustSamples(QVector<TimeStamp>& data)
     for (int n = 1; n < data.size(); ++n) {
         vec3d sB = data[n].s;
 
-        if (sA.z < s0 && sB.z > s0) // sunrise
+        if (sA.z < s0 && s0 < sB.z) // sunrise
             data[n - 1].tc += (s0 - sA.z)/(sB.z - sA.z)*dth;
-        else if (sA.z > s0 && sB.z < s0) // sunset
+        else if (sA.z > s0 && s0 > sB.z) // sunset
             data[n].tc -= (s0 - sB.z)/(sA.z - sB.z)*dth;
 
         sA = sB;

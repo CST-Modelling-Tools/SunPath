@@ -134,6 +134,8 @@ void taskSevilleto1M()
         vals << sunTemporal.average(tA, tB);
     }
     sunTemporal2.setData(vals);
+//    TimeSampler timeSampler(&sunTemporal);
+//    timeSampler.resample(QTime(0, 1), params.adjustDay);
 
     FormatTMY formatX(&sunTemporal2);
     formatX.write(s_dirTemp + "SevilleRectmy.csv", params);
@@ -155,9 +157,13 @@ void taskSevilleWeights()
 
     SunSpatial sunSpatial(sunCalculator);
     SkySampler skySampler(&sunSpatial);
-    skySampler.sample(12*degree, 40.*degree);
+    skySampler.sample(20*degree, 40.*degree);
 
     sunSpatial.setWeights(sunTemporal);
+//    sunSpatial.setValues({
+
+//    });
+
     FormatWSN formatWSN(&sunSpatial);
     formatWSN.write(s_dirTemp + "SevilleWeights.csv");
 }

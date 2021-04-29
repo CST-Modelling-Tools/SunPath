@@ -126,7 +126,7 @@ void FormatSeville::readData(QTextStream& fin, const ParamsSeville& params)
             iDNI = i;
     }
 
-    int year = 2016;
+    int year = 2016; // leap year
     int day = 0;
     int hour = 0;
     int minute = 0;
